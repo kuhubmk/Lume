@@ -1,0 +1,48 @@
+name: Convert Video to MP3
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: 'URL of the video to convert'
+        required: true
+
+jobs:
+  convert_to_mp3:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt update
+          sudo apt install -y ffmpeg
+
+      - name: Download Video File
+        run: |
+          curl -L -o input_video.mp4 "${{ github.event.inputs.video_url }}"
+
+      - name: Convert Video to MP3
+        run: |
+          ffmpeg -i input_video.mp4 -q:a 0 -map a output_audio.mp3
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: "audio-${{ github.run_id }}"
+          release_name: "Converted Audio"
+          draft: false
+          prerelease: false
+
+      - name: Upload MP3 to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: output_audio.mp3
+          asset_name: output_audio.mp3
+          asset_content_type: audio/mpeg
+
+      - name: Output Release URL
+        run: echo "::set-output name=url::${{ steps.create_release.outputs.upload_url }}"
