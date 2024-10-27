@@ -24,7 +24,7 @@ jobs:
 
       - name: Download Video File
         run: |
-          yt-dlp -f best -o input_video.mp4 "${{ github.event.inputs.video_url }}"
+          yt-dlp -f bestvideo+bestaudio/best -o input_video.mp4 "${{ github.event.inputs.video_url }}"
 
       - name: Convert Video to MP3
         run: |
