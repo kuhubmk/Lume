@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       video_url:
-        description: 'URL of the video to convert'
+        description: 'URL of the video to convert (YouTube URL)'
         required: true
 
 jobs:
@@ -15,14 +15,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install FFmpeg
+      - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y ffmpeg
+          sudo apt install -y python3-pip
+          pip3 install yt-dlp
 
       - name: Download Video File
         run: |
-          curl -L -o input_video.mp4 "${{ github.event.inputs.video_url }}"
+          yt-dlp -f best -o input_video.mp4 "${{ github.event.inputs.video_url }}"
 
       - name: Convert Video to MP3
         run: |
